@@ -1,0 +1,35 @@
+{
+  "name": "skb3",
+  "version": "1.0.0",
+  "description": "skillbranch lesson 3",
+  "main": "build/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src --watch --out-dir build",
+    "start": "nodemon --watch public --watch src build/index.js",
+    "dev": "concurrently --kill-others \"npm run build\" \"npm run start\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/konstantinov90/skb3.git"
+  },
+  "author": "konstantinov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/konstantinov90/skb3/issues"
+  },
+  "homepage": "https://github.com/konstantinov90/skb3#readme",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.18.0",
+    "babel-preset-latest": "^6.16.0",
+    "babel-preset-stage-0": "^6.16.0",
+    "babel-cli": "^6.18.0"
+  },
+  "dependencies": {
+    "bluebird": "^3.4.6",
+    "body-parser": "^1.15.2",
+    "cors": "^2.8.1",
+    "express": "^4.14.0",
+    "request": "^2.78.0"
+  }
+}
