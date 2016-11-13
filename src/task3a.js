@@ -1,12 +1,23 @@
+// require('babel-polyfill')
 import express from 'express'
+import pcObj from './load_pc_json'
+// pc.getData().then((d) => {
+//   console.log(d)
+// })
 
-const pc = require('pc.json')
+// let pc
+// function load_pc() {
+//   if (!pc)
+//     pc = require('../pc')
+// }
+
 
 const router = express.Router()
 
 
-router.get('/volumes', (req, res) => {
+router.get('/volumes', async (req, res) => {
   let vol = {}
+  const pc = await pcObj.getData()
   pc.hdd.forEach((hdd) => {
     const letter = hdd.volume
     if (vol[letter])
@@ -18,25 +29,31 @@ router.get('/volumes', (req, res) => {
 })
 
 
-router.get(/.*/, (req, res) => {
-
+router.get(/.*/, async (req, res) => {
   const query = req.url.split(/\//g).slice(1)
+  const pc = await pcObj.getData()
   let data = pc;
+
+    console.log(Object.getPrototypeOf(data))
   try {
     while (query.length) {
       const datum = query.shift()
       if (datum) {
-        console.log(query)
-        data = data[datum]
+        if (!Object.getPrototypeOf(data).hasOwnProperty(datum)) {
+          data = data[datum]
+        } else {
+          throw Error('wrong property');
+        }
       }
     }
     // data = JSON.stringify(data)
-    if (!JSON.stringify(data))
+    if (!JSON.stringify(data)){
       throw Error('not json');
+    }
     res.status(200).json(data)
   } catch (err) {
     console.log(err)
-    res.status(404).send('Not found')
+    res.status(404).send('Not Found')
   }
 })
 
