@@ -26,23 +26,26 @@ router.get(/.*/, async (req, res, next) => {
   const pc = await pcObj.getData()
   const query = _.compact(req.url.split(/\//g))
   let data = pc;
+  try {
+    query.forEach((datum, idx) => {
+      if (Object.getPrototypeOf(data).hasOwnProperty(datum)) {
+        throw(Error('wrong property'))
+      } else if (typeof data[datum] === 'string' && idx != (query.length - 1)) {
+        throw(Error('property of String not allowed'))
+      } else if (data[datum] === undefined) {
+        throw(Error('not an object'))
+      }
+      data = data[datum]
+    })
 
-  query.forEach((datum, idx) => {
-    if (Object.getPrototypeOf(data).hasOwnProperty(datum)) {
-      next(Error('wrong property'))
-    } else if (typeof data[datum] === 'string' && idx != (query.length - 1)) {
-      next(Error('property of String not allowed'))
-    } else if (data[datum] === undefined) {
-      next(Error('not an object'))
-    }
-    data = data[datum]
-  })
-
-  res.status(200).json(data)
+    res.status(200).json(data)
+  } catch (err) {
+    next(err)
+  }
 })
 
 router.use((err, req, res, next) => {
-  // console.log(err.stack)
+  console.error(err.stack)
   res.sendStatus(404)//.send('Not Found')
 })
 
