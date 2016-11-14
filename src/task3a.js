@@ -1,15 +1,8 @@
 // require('babel-polyfill')
 import express from 'express'
-import pcObj from './load_pc_json'
-// pc.getData().then((d) => {
-//   console.log(d)
-// })
+import pc from './load_pc_json'
+const pcObj = new pc()
 
-// let pc
-// function load_pc() {
-//   if (!pc)
-//     pc = require('../pc')
-// }
 
 
 const router = express.Router()
@@ -33,8 +26,6 @@ router.get(/.*/, async (req, res) => {
   const query = req.url.split(/\//g).slice(1)
   const pc = await pcObj.getData()
   let data = pc;
-
-    console.log(Object.getPrototypeOf(data))
   try {
     while (query.length) {
       const datum = query.shift()
@@ -46,7 +37,6 @@ router.get(/.*/, async (req, res) => {
         }
       }
     }
-    // data = JSON.stringify(data)
     if (!JSON.stringify(data)){
       throw Error('not json');
     }
