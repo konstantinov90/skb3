@@ -22,28 +22,28 @@ router.get('/volumes', async (req, res) => {
   res.status(200).json(vol)
 })
 
-
-router.get(/.*/, async (req, res) => {
+router.get(/.*/, async (req, res, next) => {
   const pc = await pcObj.getData()
   const query = _.compact(req.url.split(/\//g))
   let data = pc;
-  try {
-    query.forEach((datum, idx) => {
-      if (Object.getPrototypeOf(data).hasOwnProperty(datum)) {
-        throw Error('wrong property')
-      } else if (typeof data[datum] === 'string' && idx != (query.length - 1)) {
-        throw Error('property of String not allowed')
-      } else if (data[datum] === undefined) {
-        throw Error('not an object');
-      }
-      data = data[datum]
-    })
 
-    res.status(200).json(data)
-  } catch (err) {
-    console.log(err)
-    res.status(404).send('Not Found')
-  }
+  query.forEach((datum, idx) => {
+    if (Object.getPrototypeOf(data).hasOwnProperty(datum)) {
+      next(Error('wrong property'))
+    } else if (typeof data[datum] === 'string' && idx != (query.length - 1)) {
+      next(Error('property of String not allowed'))
+    } else if (data[datum] === undefined) {
+      next(Error('not an object'))
+    }
+    data = data[datum]
+  })
+
+  res.status(200).json(data)
+})
+
+router.use((err, req, res, next) => {
+  // console.log(err.stack)
+  res.sendStatus(404)//.send('Not Found')
 })
 
 export default router
