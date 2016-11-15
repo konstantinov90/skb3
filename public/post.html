@@ -4,13 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=500, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="style.css">
   <title>Document</title>
 </head>
 <body>
-  <form action="3a" method="post">
-    <p><b>POST data to problem 3A</b></p>
-    <textarea name="text" id="post-3a" cols="45" rows="10"></textarea>
+  <p><b>Send data</b></p>
+  <form name="postForm" id="postForm">
+    <div class="inputs">
+      <input type="text" id="action-select" value="http://localhost:3000/3a" placeholder="URL">
+      <select id="method-select">
+        <option value="POST">POST</option>
+        <option value="GET">GET</option>
+      </select>
+    </div>
+    <div><textarea id="text" name="text" id="post-3a" rows="10"></textarea></div>
     <div><input type="submit" value="submit problem 3a"></div>
   </form>
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="./main.js"></script>
 </body>
 </html>

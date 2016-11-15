@@ -16,7 +16,8 @@ app.use(cors())
 app.get('/', (req, res) => res.send('concurrently!!'));
 
 app.post('/3a', (req, res) => {
-  res.send(req.body)
+  const data = JSON.parse(req.body.text)
+  res.json(data)
 })
 
 app.use('/task3a', task3a)
