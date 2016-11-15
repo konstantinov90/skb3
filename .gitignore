@@ -1,4 +1,5 @@
 node_modules
 build
 pc.json
-proxy-settings.json
+.proxycfg
+npm-debug.log.*

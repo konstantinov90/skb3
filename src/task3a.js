@@ -1,9 +1,8 @@
 // require('babel-polyfill')
-import express from 'express'
 import _ from 'lodash'
+import express from 'express'
 import pc from './load_pc_json'
 const pcObj = new pc()
-
 
 
 const router = express.Router()
@@ -23,45 +22,32 @@ router.get('/volumes', async (req, res) => {
 })
 
 
-router.get(/.*/, async (req, res) => {
-  // console.log(req.params, req.url.match(/\/?([^\/]+)/g))
+router.get(/.*/, async (req, res, next) => {
   const pc = await pcObj.getData()
   const query = _.compact(req.url.split(/\//g))
-  // console.log(`has ${_.has(pc, dummy.join('.'))}`)
-  // const lastAttr = dummy.pop()
-  //
-  // const query = ['init'].concat(dummy)
-  // const data = _.get({init: pc}, query.join('.') || lastAttr)
-
-
   let data = pc;
   try {
-    // var result
-    // if (lastAttr && Object.getPrototypeOf(data).hasOwnProperty(lastAttr)) {
-    //   throw Error('wrong property');
-    // } else if (lastAttr) {
-    //   result = data[lastAttr]
-    // } else {
-    //   result = data
-    // }
-    while (query.length) {
-      const datum = query.shift()
-      if (datum) {
-        if (!Object.getPrototypeOf(data).hasOwnProperty(datum)) {
-          data = data[datum]
-        } else {
-          throw Error('wrong property');
-        }
+    query.forEach((datum, idx) => {
+      if (Object.getPrototypeOf(data).hasOwnProperty(datum)) {
+        throw(Error('wrong property'))
+      } else if (typeof data[datum] === 'string' && idx != (query.length - 1)) {
+        throw(Error('property of String not allowed'))
+      } else if (data[datum] === undefined) {
+        throw(Error('not an object'))
       }
-    }
-    if (!JSON.stringify(data)){
-      throw Error('not json');
-    }
+      data = data[datum]
+    })
+
     res.status(200).json(data)
   } catch (err) {
-    console.log(err)
-    res.status(404).send('Not Found')
+    next(err)
   }
+})
+
+
+router.use((err, req, res, next) => {
+  console.error(err.stack)
+  res.sendStatus(404)//.send('Not Found')
 })
 
 export default router
