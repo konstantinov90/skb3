@@ -1,5 +1,6 @@
 // require('babel-polyfill')
 import express from 'express'
+import _ from 'lodash'
 import pc from './load_pc_json'
 const pcObj = new pc()
 
@@ -23,10 +24,26 @@ router.get('/volumes', async (req, res) => {
 
 
 router.get(/.*/, async (req, res) => {
-  const query = req.url.split(/\//g).slice(1)
+  // console.log(req.params, req.url.match(/\/?([^\/]+)/g))
   const pc = await pcObj.getData()
+  const query = _.compact(req.url.split(/\//g))
+  // console.log(`has ${_.has(pc, dummy.join('.'))}`)
+  // const lastAttr = dummy.pop()
+  //
+  // const query = ['init'].concat(dummy)
+  // const data = _.get({init: pc}, query.join('.') || lastAttr)
+
+
   let data = pc;
   try {
+    // var result
+    // if (lastAttr && Object.getPrototypeOf(data).hasOwnProperty(lastAttr)) {
+    //   throw Error('wrong property');
+    // } else if (lastAttr) {
+    //   result = data[lastAttr]
+    // } else {
+    //   result = data
+    // }
     while (query.length) {
       const datum = query.shift()
       if (datum) {
