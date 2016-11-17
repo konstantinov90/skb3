@@ -24,9 +24,13 @@ router.get('/volumes', async (req, res) => {
 
 router.get(/.*/, async (req, res, next) => {
   const pc = await pcObj.getData()
-  const query = _.compact(req.url.split(/\//g))
-  let data = pc;
   try {
+    if (req.url.search(/\/\//g) >= 0) {
+      throw(Error('wrong route'))
+    }
+    const query = _.compact(req.url.split(/\//g))
+    let data = pc;
+
     query.forEach((datum, idx) => {
       if (Object.getPrototypeOf(data).hasOwnProperty(datum)) {
         throw(Error('wrong property'))
