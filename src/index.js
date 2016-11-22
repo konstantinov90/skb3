@@ -4,7 +4,7 @@ import parser from 'body-parser'
 import cors from 'cors'
 
 import task3a from './task3a'
-import tests from './tests/test_router'
+import tests from './test/test_router'
 
 const app = express();
 
