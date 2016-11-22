@@ -4,9 +4,10 @@ import parser from 'body-parser'
 import cors from 'cors'
 
 import task3a from './task3a'
-
+import tests from './tests/test_router'
 
 const app = express();
+
 
 app.use(express.static('public'))
 app.use(parser.urlencoded({ extended: true }))
@@ -21,5 +22,6 @@ app.post('/3a', (req, res) => {
 })
 
 app.use('/task3a', task3a)
+app.use('/tests', tests)
 
 app.listen(3000, () => console.log('listening 3000'));

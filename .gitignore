@@ -3,3 +3,4 @@ build
 pc.json
 .proxycfg
 npm-debug.log.*
+tests

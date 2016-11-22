@@ -5,6 +5,7 @@ import pc from './load_pc_json'
 const pcObj = new pc()
 
 
+
 const router = express.Router()
 
 
@@ -21,16 +22,11 @@ router.get('/volumes', async (req, res) => {
   res.status(200).json(vol)
 })
 
-
 router.get(/.*/, async (req, res, next) => {
   const pc = await pcObj.getData()
+  const query = _.compact(req.url.split(/\//g))
+  let data = pc;
   try {
-    if (req.url.search(/\/\//g) >= 0) {
-      throw(Error('wrong route'))
-    }
-    const query = _.compact(req.url.split(/\//g))
-    let data = pc;
-
     query.forEach((datum, idx) => {
       if (Object.getPrototypeOf(data).hasOwnProperty(datum)) {
         throw(Error('wrong property'))
@@ -47,7 +43,6 @@ router.get(/.*/, async (req, res, next) => {
     next(err)
   }
 })
-
 
 router.use((err, req, res, next) => {
   console.error(err.stack)
