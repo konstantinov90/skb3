@@ -4,6 +4,7 @@ import parser from 'body-parser'
 import cors from 'cors'
 
 import task3a from './task3a'
+import task3b from './task3b'
 import tests from './test/test_router'
 
 const app = express();
@@ -22,6 +23,7 @@ app.post('/3a', (req, res) => {
 })
 
 app.use('/task3a', task3a)
+app.use('/task3b', task3b)
 app.use('/tests', tests)
 
 app.listen(3000, () => console.log('listening 3000'));
