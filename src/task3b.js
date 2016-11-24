@@ -1,135 +1,146 @@
 import express from 'express'
 import _ from 'lodash'
-import Pets from './load_pets_json'
+import Pets from './petsJSONLoader'
 const pets = new Pets()
 
 const router = express.Router()
-
-function compare(a,b) {
-  if (a.id < b.id)
-    return -1;
-  if (a.id > b.id)
-    return 1;
-  return 0;
-}
 
 router.use(async (req, res, next) => {
   const data = await pets.getData()
   req.pets = data.pets
   req.users = data.users
+
+  req.petsPopulated = getPopulatedPets(req.pets, req.users)
+  req.usersPopulated = getPopulatedUsers(req.users, req.pets)
   next()
 })
 
-function populatePet(pet, req) {
-  pet.user = req.users.filter(u => u.id == pet.userId)[0]
+function compare(a,b) {return a.id < b.id? -1: a.id > b.id? 1: 0}
+
+function getPopulatedPets(pets, users) {
+  const petsPopulated =  _.cloneDeep(pets)
+  petsPopulated.map(p => {
+    const usr = users.filter(u => u.id == p.userId)
+    p.user = usr.length? usr[0]: null
+  })
+  return petsPopulated
 }
 
-function populateUser(user, req) {
-  user.pets = req.pets.filter(p => user.id == p.userId)
+function getPopulatedUsers(users, pets) {
+  const usersPopulated = _.cloneDeep(users)
+  usersPopulated.map(u => {
+    u.pets = pets.filter(p => u.id == p.userId).sort(compare)
+  })
+  return usersPopulated
 }
 
-router.use('/pets*',(req, res, next) => {
-  req.pets.forEach(p => {populatePet(p, req)})
+router.use('/users*', (req, res, next) => {
+  const pet = req.query.havePet;
+  if (pet) {
+    const typePets = req.petsPopulated.filter(p => p.type == pet);
+    req.users = []
+    typePets.forEach(curPet => {
+      req.users = req.users.concat(curPet.user)
+    })
+    req.users = _.uniqBy(req.users, u => u.id)
+    req.usersPopulated = getPopulatedUsers(req.users, req.pets)
+  }
   next()
 })
 
-router.use('/users*',(req, res, next) => {
-  req.users.forEach(u => {populateUser(u, req)})
+router.use('/pets*', (req, res, next) => {
+  const petType = req.query.type;
+  const ageGT = req.query.age_gt;
+  const ageLT = req.query.age_lt;
+  if (petType) {
+    req.pets = req.pets.filter(p => p.type == petType)
+    req.petsPopulated = req.petsPopulated.filter(p => p.type == petType)
+  }
+  if (ageGT) {
+    req.pets = req.pets.filter(p => p.age > +ageGT)
+    req.petsPopulated = req.petsPopulated.filter(p => p.age > +ageGT)
+  }
+  if (ageLT) {
+    req.pets = req.pets.filter(p => p.age < +ageLT)
+    req.petsPopulated = req.petsPopulated.filter(p => p.age < +ageLT)
+  }
   next()
 })
 
 router.use((req, res, next) => {
-  const petType = req.query.type;
-  const ageGT = req.query.age_gt;
-  const ageLT = req.query.age_lt;
-  const pet = req.query.havePet;
-  if (pet) {
-    req.pets.forEach(p => {populatePet(p, req)})
-    const typePets = req.pets.filter(p => p.type == pet);
-    req.users = []
-    typePets.forEach(curPet => {
-      // console.log(req.users.filter(u => u.id == curPet.userId))
-      req.users = _.uniqBy(req.users.concat(curPet.user), (u) => u.id)
-    })
-    req.pets.forEach(p => delete p['user'])
-
-  }
-  if (petType)
-    req.pets = req.pets.filter(p => p.type == petType)
-  if (ageGT)
-    req.pets = req.pets.filter(p => p.age > +ageGT)
-  if (ageLT)
-    req.pets = req.pets.filter(p => p.age < +ageLT)
+  req.users = req.users.sort(compare)
+  req.usersPopulated = req.usersPopulated.sort(compare)
+  req.pets = req.pets.sort(compare)
+  req.petsPopulated = req.petsPopulated.sort(compare)
   next()
 })
-
 
 router.get('/', async (req, res) => {
   res.send(await pets.getData())
 })
 
+
 router.get('/users', (req, res) => {
-    res.send(req.users.map(u => _.omit(u,'pets')).sort(compare));
+    res.send(req.users);
 })
 
 router.get('/users/populate', (req, res) => {
-    req.pets.forEach(p => delete p['user'])
-    res.send(req.users.sort(compare));
+    res.send(req.usersPopulated);
 })
+
 
 router.use('/users/:value*', (req, res, next) => {
   const value = req.params.value
-  console.log(value)
   let key;
+
   if (+value == value)
     key = 'id';
-  else if (typeof value == 'string' )
+  else
     key = 'username';
-  req.user = req.users.filter(u => u[key] == value)[0];
-  console.log(key, req.users.filter(u => u.username == 'blink'))
-  if (! req.user)
+  req.users = req.users.filter(u => u[key] == value)[0];
+  req.usersPopulated = req.usersPopulated.filter(u => u[key] == value)[0];
+  if (!req.users)
     next(new Error('user not found'))
   else
     next()
 })
 
 router.get('/users/:value', (req, res) => {
-  res.send(_.omit(req.user, 'pets'));
+  res.send(req.users);
 })
+
 router.get('/users/:value/populate', (req, res) => {
-  res.send(req.user);
+  res.send(req.usersPopulated);
 })
 
 router.get('/users/:value/pets', (req, res) => {
-  console.log(req.pets, req.user)
-  const userPets = req.pets.filter(p => p.userId == req.user.id)
-  res.send(userPets.sort(compare));
+  res.send(req.usersPopulated.pets);
 })
+
 
 router.get('/pets', (req, res) => {
-  res.send(req.pets.map(p => _.omit(p, 'user')).sort(compare));
+  res.send(req.pets);
 })
 
-
-
-
-
 router.get('/pets/populate', (req, res) => {
-  let pets = req.pets
-  req.users.forEach(u => delete u['pets'])
-  res.send(req.pets.sort(compare))
+  res.send(req.petsPopulated)
+})
+
+router.use('/pets/:id*', (req, res, next) => {
+  req.pets = req.pets.filter(p => p.id == req.params.id)[0]
+  req.petsPopulated = req.petsPopulated.filter(p => p.id == req.params.id)[0]
+  if (!req.pets)
+    next(new Error('pet not found'))
+  else
+    next()
 })
 
 router.get('/pets/:id', (req, res, next) => {
-  const pet = req.pets.filter(p => p.id == req.params.id).map(p => _.omit(p, 'user'))[0]
-  if (!pet)
-    next(new Error('pet not found'))
-  else
-    res.send(pet);
+  res.send(req.pets);
 })
 
 router.get('/pets/:id/populate', (req, res) => {
-  res.send(req.pets.filter(p => p.id == req.params.id)[0]);
+  res.send(req.petsPopulated);
 })
 
 router.use((err, req, res, next) => {

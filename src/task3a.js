@@ -1,7 +1,7 @@
 // require('babel-polyfill')
 import _ from 'lodash'
 import express from 'express'
-import pc from './load_pc_json'
+import pc from './pcJSONLoader'
 const pcObj = new pc()
 
 

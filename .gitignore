@@ -4,3 +4,5 @@ pc.json
 .proxycfg
 npm-debug.log.*
 tests
+tester.js
+tests.json

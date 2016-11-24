@@ -5,17 +5,17 @@ import request from 'request'
 Promise.promisifyAll(request)
 
 
-class pcJSON {
+class JSONLoader {
   constructor() {
     this.data = null
-    this.url = 'https://gist.githubusercontent.com/isuvorov/ce6b8d87983611482aac89f6d7bc0037/raw/pc.json'
+    this.url = null
     this.proxySettingsFileName = './.proxycfg'
     this.proxy = null
     this.promisePending = true
-    this.fetchJSON()
-    .then(() => {
-      console.log('fetched')
-    })
+    // this.fetchJSON()
+    // .then(() => {
+    //   console.log('fetched')
+    // })
   }
 
   async getData () {
@@ -52,4 +52,4 @@ class pcJSON {
 // const obj = new pcJSON()
 
 
-export default pcJSON
+export default JSONLoader
