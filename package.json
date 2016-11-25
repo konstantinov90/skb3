@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "babel src --watch --out-dir build",
     "start": "nodemon --watch public --watch src build/index.js",
-    "dev": "concurrently --kill-others \"npm run build\" \"npm run start\""
+    "dev": "concurrently --kill-others \"npm run build\" \"npm run start\"",
+    "createPokemons": "node src\\pokemonsGetter.js"
   },
   "repository": {
     "type": "git",

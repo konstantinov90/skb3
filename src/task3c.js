@@ -1,7 +1,7 @@
 import express from 'express'
 import _ from 'lodash'
 
-const pokemons = require('../pokemonsOld')
+const pokemons = require('/pokemons')
 
 const router = express.Router()
 
